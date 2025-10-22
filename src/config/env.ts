@@ -13,6 +13,13 @@ export const config = {
   whatsapp: {
     puppeteer: {
       headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu'
+      ],
+      executablePath: process.env.CHROME_PATH || undefined
     },
   },
   conversation: {
