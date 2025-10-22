@@ -1,6 +1,7 @@
 import { openai } from "../config/openai";
 import { ConversationMessage, LoanApplication } from "../types";
 import { loanApplicationFunction, handleLoanSubmission } from "./functionCallingService";
+import { addMessage } from "./conversationService";
 
 export const generateResponse = async (
   messages: ConversationMessage[],
@@ -31,10 +32,38 @@ export const generateResponse = async (
           phone_number: phoneNumber,
         };
 
-        handleLoanSubmission(loanData, phoneNumber);
+        // Get eligibility result from loan submission handler
+        const eligibilityResult = handleLoanSubmission(loanData, phoneNumber);
 
-        // Return a confirmation message
-        return "✅ Thank you! Your loan application has been successfully submitted. Our team will review your application and get back to you within 24-48 hours. You will receive updates on your registered phone number and email.";
+        // Create a new system message with eligibility data for AI to generate response
+        const eligibilityMessage = {
+          role: "system" as const,
+          content: `LOAN APPLICATION PROCESSED:
+- Application Status: Submitted Successfully
+- Eligibility Check: Completed
+- Eligible: ${eligibilityResult.eligible ? "YES" : "NO"}
+- Eligibility Score: ${eligibilityResult.eligibilityScore}%
+- Loan Type: ${loanData.loan_type.replace(/_/g, " ").toUpperCase()}
+- Loan Amount Requested: ${loanData.customer_details.loan_amount_required || "N/A"}
+
+Generate a natural, friendly response informing the customer about their eligibility status. If eligible, congratulate them and mention next steps. If not eligible, be empathetic and suggest they may reapply in the future.`,
+        };
+
+        // Call OpenAI again with eligibility data to generate natural response
+        const followUpCompletion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [...messages, eligibilityMessage] as any,
+          max_tokens: maxTokens,
+        });
+
+        const aiResponse =
+          followUpCompletion.choices[0].message.content ||
+          "Your loan application has been submitted successfully!";
+
+        // Add the AI response to conversation history
+        addMessage(phoneNumber, "assistant", aiResponse);
+
+        return aiResponse;
       }
     }
 
