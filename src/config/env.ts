@@ -5,7 +5,7 @@ dotenv.config();
 
 export const config = {
   openai: {
-    apiKey: "",
+    apiKey: process.env.OPENAI_API_KEY || "",
   },
   server: {
     port: process.env.PORT || 3000,
