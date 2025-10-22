@@ -50,21 +50,34 @@ app.post(
   "/parse-pdf",
   upload.single("file"),
   async (req: Request, res: Response) => {
+    // Log request details FIRST - before any try/catch or conditional logic
+    console.log("\n📥 ========== PDF PARSE REQUEST ==========");
+    console.log("Timestamp:", new Date().toISOString());
+    console.log("File uploaded:", req.file?.originalname);
+    console.log("File size:", req.file?.size, "bytes");
+    console.log("File path:", req.file?.path);
+    console.log("=========================================\n");
+
     try {
       if (!req.file) {
+        console.error("❌ No file uploaded in request");
         return res.status(400).json({
-          error:
+          error: "NO_FILE",
+          message:
             "No file uploaded. Please upload a PDF file with the key 'file'",
         });
       }
 
       const filePath = req.file.path;
+      console.log("🔄 Starting PDF extraction...");
 
       // Extract text from PDF
       const extractedText = await extractTextFromPDF(filePath);
+      console.log("✅ PDF extraction successful!");
 
       // Clean up - delete the uploaded file
       fs.unlinkSync(filePath);
+      console.log("🗑️ Cleaned up uploaded file");
 
       // Return the extracted text
       res.json({
@@ -73,16 +86,36 @@ app.post(
         extractedText: extractedText,
         textLength: extractedText.length,
       });
+      console.log("✅ Response sent successfully\n");
     } catch (error: any) {
+      console.error("\n❌ ========== PDF PARSE ERROR ==========");
+      console.error("Error caught in Express handler");
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+      console.error("Full error:", error);
+      console.error("=======================================\n");
+
       // Clean up file if it exists
       if (req.file?.path && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
+        try {
+          fs.unlinkSync(req.file.path);
+          console.log("🗑️ Cleaned up uploaded file after error");
+        } catch (cleanupError: any) {
+          console.error("⚠️ Failed to clean up file:", cleanupError.message);
+        }
       }
 
-      console.error("Error parsing PDF vbro:", error);
       res.status(500).json({
-        error: "Failed to parse PDF twin",
-        details: error.message,
+        success: false,
+        error: "PDF_EXTRACTION_FAILED",
+        errorType: error.name || "Unknown",
+        message: error.message || "Failed to extract text from PDF",
+        details: {
+          fileName: req.file?.originalname,
+          fileSize: req.file?.size,
+          stack: error.stack,
+        },
       });
     }
   },
