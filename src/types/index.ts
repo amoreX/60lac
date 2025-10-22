@@ -18,3 +18,16 @@ export interface MessageContext {
   text?: string;
   hasMedia: boolean;
 }
+
+export interface LoanApplication {
+  loan_type: string;
+  customer_details: Record<string, any>;
+  documents_received: string[];
+  timestamp: string;
+  phone_number: string;
+}
+
+export interface FunctionCall {
+  name: string;
+  arguments: string;
+}

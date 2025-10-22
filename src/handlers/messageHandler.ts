@@ -12,6 +12,8 @@ import {
   cleanNumber,
   saveFile,
   generateFilename,
+  extractTextFromPDF,
+  isPDF,
 } from "../utils";
 
 export const handleIncomingMessage = async (message: Message): Promise<void> => {
@@ -57,14 +59,59 @@ const handleMediaMessage = async (
   let userContent: any[];
   let reply: string;
 
+  // Handle PDFs
+  if (isPDF(media.mimetype)) {
+    console.log("📄 PDF document detected! Extracting text...");
+
+    try {
+      const extractedText = await extractTextFromPDF(mediaInfo.filePath);
+      console.log(`✅ Extracted ${extractedText.length} characters from PDF`);
+      console.log("📝 PDF Content Preview:", extractedText.substring(0, 200) + "...");
+
+      // Send the PDF text to OpenAI for analysis
+      const caption = message.body || "I've uploaded a document. Please extract relevant loan application information from it.";
+
+      userContent = [
+        {
+          type: "text",
+          text: `${caption}\n\nDocument: ${filename}\n\nExtracted Text from PDF:\n${extractedText}`,
+        },
+      ];
+
+      // Add to conversation history
+      addMessage(cleanedNumber, "user", userContent);
+
+      // Get conversation and send to OpenAI
+      const conversationMessages = getHistory(cleanedNumber);
+      reply = await generateResponse(conversationMessages, cleanedNumber);
+
+    } catch (error) {
+      console.error("Error extracting PDF text:", error);
+      userContent = [
+        {
+          type: "text",
+          text: `User uploaded a PDF document: ${filename}. Unable to extract text, but file is saved.`,
+        },
+      ];
+
+      addMessage(cleanedNumber, "user", userContent);
+      const conversationMessages = getHistory(cleanedNumber);
+      reply = await generateResponse(conversationMessages, cleanedNumber);
+    }
+  }
   // Handle images
-  if (media.mimetype.startsWith("image/")) {
+  else if (media.mimetype.startsWith("image/")) {
     logImageProcessing();
+
+    // Enhanced prompt for comprehensive detail extraction
+    const imageAnalysisPrompt = message.body
+      ? `${message.body}\n\nIMPORTANT: Analyze this image/document thoroughly and extract ALL relevant details including: names, dates, numbers (phone, ID, account), addresses, income figures, employment details, property information, vehicle details, financial data, signatures, stamps, and any other information that might be useful for a loan application. Be comprehensive and detailed.`
+      : "I've uploaded a document image. Please analyze this document image carefully and extract ALL relevant information including: personal details (name, DOB, address, phone, email), ID numbers (Aadhaar, PAN, etc.), financial information (income, salary, bank details), employment details (company name, designation, employment type), property/vehicle details if any, and any other details visible in the document. Extract every piece of information that could be useful for a loan application.";
 
     userContent = [
       {
         type: "text",
-        text: message.body || "What's in this image?",
+        text: imageAnalysisPrompt,
       },
       {
         type: "image_url",
@@ -79,10 +126,10 @@ const handleMediaMessage = async (
 
     // Get conversation and send to OpenAI
     const conversationMessages = getHistory(cleanedNumber);
-
-    reply = await generateResponse(conversationMessages);
-  } else {
-    // Handle other documents
+    reply = await generateResponse(conversationMessages, cleanedNumber);
+  }
+  // Handle other documents
+  else {
     logDocumentReceived();
 
     userContent = [
@@ -97,11 +144,10 @@ const handleMediaMessage = async (
 
     // Get conversation and send to OpenAI
     const conversationMessages = getHistory(cleanedNumber);
-
-    reply = await generateResponse(conversationMessages);
+    reply = await generateResponse(conversationMessages, cleanedNumber);
 
     if (!reply || reply === "Sorry, I could not process your request.") {
-      reply = `📄 Got your file (${filename})! File saved successfully.`;
+      reply = `📄 Got your file (${filename})! File saved successfully. Let me know if you'd like me to help with anything else.`;
     }
   }
 
@@ -131,8 +177,8 @@ const handleTextMessage = async (
   // Get conversation history
   const conversationMessages = getHistory(cleanedNumber);
 
-  // Generate AI reply using OpenAI with conversation history
-  const reply = await generateResponse(conversationMessages);
+  // Generate AI reply using OpenAI with conversation history and function calling
+  const reply = await generateResponse(conversationMessages, cleanedNumber);
 
   // Add bot reply to conversation history
   addMessage(cleanedNumber, "assistant", reply);
