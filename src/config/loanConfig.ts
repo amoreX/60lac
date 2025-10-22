@@ -159,6 +159,35 @@ export const loanTypes: Record<string, LoanType> = {
       "purpose_of_loan",
     ],
   },
+  // ========== TESTING ONLY - REMOVE AFTER TESTING ==========
+  student_loan: {
+    name: "student_loan",
+    displayName: "Student Loan",
+    requiredDocuments: [
+      "Valid ID Proof (Aadhaar/Student ID)",
+      "Resume/CV",
+      "Academic Transcripts/Grade Reports",
+      "College Admission Letter (if applicable)",
+      "Parent/Guardian Income Proof (if co-applicant)",
+    ],
+    requiredFields: [
+      "full_name",
+      "phone_number",
+      "email",
+      "college_name",
+      "course_name",
+      "year_of_study",
+      "gpa_cgpa",
+      "number_of_hackathons_participated",
+      "number_of_projects",
+      "technical_skills",
+      "internship_experience",
+      "github_profile",
+      "loan_amount_required",
+      "purpose_of_loan",
+    ],
+  },
+  // ========== END TESTING SECTION ==========
 };
 
 export const getLoanTypesList = (): string => {

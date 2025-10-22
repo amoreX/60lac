@@ -17,6 +17,7 @@ export const loanApplicationFunction = {
           "home_loan",
           "car_loan",
           "business_loan",
+          "student_loan", // TESTING ONLY - REMOVE AFTER TESTING
         ],
         description: "The type of loan the customer is applying for",
       },
