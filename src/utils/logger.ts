@@ -45,6 +45,10 @@ export const logDocumentReceived = (): void => {
   console.log("📄 Document received (non-image)");
 };
 
+export const logAudioProcessing = (): void => {
+  console.log("🎤 Sending audio to Whisper API for transcription...");
+};
+
 export const logBotReply = (reply: string): void => {
   console.log(`🤖 Bot: ${reply}`);
 };

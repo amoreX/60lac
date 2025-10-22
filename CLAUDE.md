@@ -45,7 +45,7 @@ This codebase uses **plain functions** instead of classes throughout. All servic
 
 4. **Handlers Layer** (`src/handlers/`)
    - `messageHandler.ts`: Main message routing (text vs media)
-   - Handles PDF extraction, image analysis, and text messages
+   - Handles PDF extraction, image analysis, voice message transcription, and text messages
 
 5. **Utils Layer** (`src/utils/`)
    - `logger.ts`: Console logging functions
@@ -56,6 +56,11 @@ This codebase uses **plain functions** instead of classes throughout. All servic
      - Fallback: OCR extraction using Tesseract.js and pdf-poppler
      - Detailed logging at every step for debugging
      - Structured error messages with stack traces and context
+   - `audioTranscriber.ts`: Audio/voice message transcription using OpenAI Whisper API
+     - Supports multiple audio formats (mp3, ogg, wav, m4a, webm, etc.)
+     - Automatic language detection for English and Hindi
+     - Automatic file extension detection and assignment
+     - Comprehensive error handling with detailed logging
 
 6. **Types Layer** (`src/types/`)
    - TypeScript interfaces for messages, media, loan applications
@@ -68,11 +73,19 @@ This codebase uses **plain functions** instead of classes throughout. All servic
    - Routes to text or media handler
 
 2. **Media Processing**
-   - **PDFs**: Two-phase text extraction approach
+   - **Voice/Audio Messages**: Transcribed using OpenAI Whisper API ✅ **NOW WORKING**
+     - Supports all WhatsApp audio formats (ogg, mp3, m4a, wav, webm, etc.)
+     - **Automatic language detection** - detects and transcribes English and Hindi
+     - Automatic transcription to text via Whisper API
+     - Transcribed text sent to OpenAI for processing with conversation context
+     - Audio files saved to `uploads/` directory with proper extensions
+     - Detailed logging of transcription process
+   - **PDFs**: Two-phase text extraction approach ⚠️ **CURRENTLY NOT WORKING**
      - Phase 1: Direct extraction via pdf-parse (fast, works for text-based PDFs)
      - Phase 2: OCR fallback via Tesseract.js + pdf-poppler (for scanned/image PDFs)
      - Automatic fallback if direct extraction yields < 100 characters
      - Text cleaning and normalization (whitespace, newlines)
+     - Test endpoint: `POST /parse-pdf` - upload PDFs to test extraction
    - **Images**: Sent to OpenAI Vision API with enhanced extraction prompt
    - All media saved to `uploads/` directory
    - Files stored with comprehensive logging to console
@@ -115,6 +128,13 @@ Loan types defined in `src/config/loanConfig.ts`:
 
 ## Important Implementation Details
 
+### Known Issues
+⚠️ **PDF Extraction is currently not working** - The `extractTextFromPDF()` function in `src/utils/pdfParser.ts` has issues and needs to be fixed. See `todo.txt` PRIORITY 3 for details. You can test PDF extraction using the `POST /parse-pdf` endpoint.
+
+⚠️ **Eligibility calculation is placeholder** - Currently uses random scoring (0-100). Needs to be replaced with ML model. See `todo.txt` PRIORITY 1.
+
+✅ **Voice message support is now implemented** - Audio and voice messages are transcribed using OpenAI Whisper API and processed normally.
+
 ### Express Server & Endpoints
 - **HTTP logging**: Morgan middleware logs all HTTP requests in "dev" format
 - **Test endpoint**: `POST /parse-pdf` for testing PDF extraction
@@ -144,6 +164,8 @@ const data = await pdfParse(dataBuffer);
 ```
 
 ### PDF Extraction Details
+⚠️ **CURRENTLY NOT WORKING - NEEDS FIXING** (See todo.txt Priority 3)
+
 - **Direct extraction**: Uses pdf-parse to extract text from text-based PDFs
 - **OCR fallback**: Triggered automatically if < 100 characters extracted
   - Requires `pdf-poppler` npm package AND Poppler system utility installed
@@ -155,6 +177,39 @@ const data = await pdfParse(dataBuffer);
   - Detailed error messages including error type, message, and full stack traces
   - Hints for common issues (missing Poppler installation)
   - Boxed error output sections for easy visual identification
+- **Testing endpoint**: `POST /parse-pdf` - upload PDF files to test extraction
+
+### Audio/Voice Message Transcription
+✅ **FULLY WORKING**
+
+- **Whisper API**: Uses OpenAI's Whisper API for accurate speech-to-text transcription
+- **Automatic Language Detection**: Whisper automatically detects and transcribes English and Hindi
+  - Primary languages: English and Hindi
+  - No need to specify language - works automatically
+  - Returns transcription in the detected language
+- **Supported formats**: Automatically handles all WhatsApp audio formats
+  - OGG (WhatsApp voice notes)
+  - MP3, M4A, MP4 (audio files)
+  - WAV, WEBM, AAC, OPUS (other formats)
+- **Automatic file handling**:
+  - Detects audio mimetype and assigns correct file extension
+  - Saves audio files to `uploads/` directory
+  - Creates file stream for API upload
+- **Transcription process**:
+  - Audio file sent to Whisper API via OpenAI SDK
+  - Transcribed text returned as plain text
+  - Transcription added to conversation context with `[Voice Message Transcription]:` prefix
+  - Processed by OpenAI GPT for natural response generation
+- **Error handling**: Comprehensive error handling with detailed logging
+  - File existence validation
+  - API error capture and logging
+  - Fallback messages if transcription fails
+  - All errors logged with error type, message, and stack trace
+- **Logging**: Detailed step-by-step logging with emojis
+  - File size and path logged
+  - API call status logged
+  - Transcription preview (first 100 characters)
+  - Success/failure status clearly indicated
 
 ### HTTP Request Logging
 - **Morgan middleware**: Configured with "dev" format for colored, concise logs
