@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import morgan from "morgan";
 import { config } from "./config/env";
 import { initializeWhatsApp } from "./services";
 import { extractTextFromPDF } from "./utils/pdfParser";
@@ -22,6 +23,7 @@ const upload = multer({
 });
 
 // Middleware
+app.use(morgan("dev")); // Log HTTP requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -77,9 +79,9 @@ app.post(
         fs.unlinkSync(req.file.path);
       }
 
-      console.error("Error parsing PDF:", error);
+      console.error("Error parsing PDF vbro:", error);
       res.status(500).json({
-        error: "Failed to parse PDF",
+        error: "Failed to parse PDF twin",
         details: error.message,
       });
     }
