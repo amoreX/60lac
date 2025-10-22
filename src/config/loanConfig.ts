@@ -1,7 +1,7 @@
 export interface LoanType {
   name: string;
   displayName: string;
-  requiredDocuments: string[];
+  suggestedDocuments: string[]; // Changed from requiredDocuments to suggestedDocuments
   requiredFields: string[];
 }
 
@@ -9,10 +9,10 @@ export const loanTypes: Record<string, LoanType> = {
   gold_loan: {
     name: "gold_loan",
     displayName: "Gold Loan",
-    requiredDocuments: [
-      "Valid ID Proof (Aadhaar/PAN/Passport)",
-      "Gold items for assessment",
-      "Address Proof",
+    suggestedDocuments: [
+      "Valid ID Proof (Aadhaar/PAN/Passport) - to extract name, DOB, address",
+      "Gold appraisal certificate - to extract weight and purity",
+      "Address Proof - to extract address details",
     ],
     requiredFields: [
       "full_name",
@@ -27,11 +27,11 @@ export const loanTypes: Record<string, LoanType> = {
   two_wheeler_loan: {
     name: "two_wheeler_loan",
     displayName: "Two Wheeler Loan",
-    requiredDocuments: [
-      "Valid ID Proof (Aadhaar/PAN/Passport)",
-      "Income Proof (Salary Slips/Bank Statements - Last 3 months)",
-      "Address Proof",
-      "Employment Proof",
+    suggestedDocuments: [
+      "Valid ID Proof (Aadhaar/PAN/Passport) - to extract name, DOB, address",
+      "Income Proof (Salary Slips/Bank Statements) - to extract income, employer details",
+      "Address Proof - to extract address",
+      "Vehicle quotation - to extract vehicle model and price",
     ],
     requiredFields: [
       "full_name",
@@ -50,12 +50,12 @@ export const loanTypes: Record<string, LoanType> = {
   personal_loan: {
     name: "personal_loan",
     displayName: "Personal Loan",
-    requiredDocuments: [
-      "Valid ID Proof (Aadhaar/PAN/Passport)",
-      "Income Proof (Salary Slips/Bank Statements - Last 6 months)",
-      "Address Proof",
-      "Employment Proof",
-      "Credit Score Report (if available)",
+    suggestedDocuments: [
+      "Valid ID Proof (Aadhaar/PAN/Passport) - to extract name, DOB, PAN, address",
+      "Income Proof (Salary Slips/Bank Statements) - to extract income, employer name",
+      "Address Proof - to extract current address",
+      "Employment letter - to extract employer name, employment type",
+      "Credit Score Report (optional) - to assess creditworthiness",
     ],
     requiredFields: [
       "full_name",
@@ -76,14 +76,13 @@ export const loanTypes: Record<string, LoanType> = {
   home_loan: {
     name: "home_loan",
     displayName: "Home Loan",
-    requiredDocuments: [
-      "Valid ID Proof (Aadhaar/PAN/Passport)",
-      "Income Proof (Salary Slips/ITR - Last 2 years)",
-      "Bank Statements (Last 6 months)",
-      "Property Documents",
-      "Sale Agreement",
-      "Address Proof",
-      "Employment Proof",
+    suggestedDocuments: [
+      "Valid ID Proof (Aadhaar/PAN/Passport) - to extract name, DOB, PAN, address",
+      "Income Proof (Salary Slips/ITR) - to extract income, employer details",
+      "Bank Statements - to verify income and financial stability",
+      "Property Documents - to extract property value, address, type",
+      "Sale Agreement - to extract property price and terms",
+      "Employment Proof - to extract employer name, employment type",
     ],
     requiredFields: [
       "full_name",
@@ -107,12 +106,11 @@ export const loanTypes: Record<string, LoanType> = {
   car_loan: {
     name: "car_loan",
     displayName: "Car Loan",
-    requiredDocuments: [
-      "Valid ID Proof (Aadhaar/PAN/Passport)",
-      "Income Proof (Salary Slips/Bank Statements - Last 3 months)",
-      "Address Proof",
-      "Employment Proof",
-      "Vehicle Quotation/Pro-forma Invoice",
+    suggestedDocuments: [
+      "Valid ID Proof (Aadhaar/PAN/Passport) - to extract name, DOB, PAN, address",
+      "Income Proof (Salary Slips/Bank Statements) - to extract income details",
+      "Address Proof - to extract current address",
+      "Vehicle Quotation/Pro-forma Invoice - to extract vehicle make, model, price",
     ],
     requiredFields: [
       "full_name",
@@ -133,14 +131,14 @@ export const loanTypes: Record<string, LoanType> = {
   business_loan: {
     name: "business_loan",
     displayName: "Business Loan",
-    requiredDocuments: [
-      "Valid ID Proof (Aadhaar/PAN/Passport)",
-      "Business Registration Documents",
-      "GST Registration Certificate",
-      "ITR (Last 2 years)",
-      "Bank Statements (Last 6 months - Business Account)",
-      "Business Address Proof",
-      "Financial Statements (Balance Sheet, P&L)",
+    suggestedDocuments: [
+      "Valid ID Proof (Aadhaar/PAN/Passport) - to extract owner name, DOB, PAN",
+      "Business Registration Documents - to extract business name, type, registration date",
+      "GST Registration Certificate - to extract GST number",
+      "ITR (Last 2 years) - to extract annual turnover, profit",
+      "Bank Statements (Business Account) - to verify turnover and financial health",
+      "Business Address Proof - to extract business location",
+      "Financial Statements (Balance Sheet, P&L) - to extract turnover, profit margins",
     ],
     requiredFields: [
       "full_name",
@@ -163,12 +161,12 @@ export const loanTypes: Record<string, LoanType> = {
   student_loan: {
     name: "student_loan",
     displayName: "Student Loan",
-    requiredDocuments: [
-      "Valid ID Proof (Aadhaar/Student ID)",
-      "Resume/CV",
-      "Academic Transcripts/Grade Reports",
-      "College Admission Letter (if applicable)",
-      "Parent/Guardian Income Proof (if co-applicant)",
+    suggestedDocuments: [
+      "Valid ID Proof (Aadhaar/Student ID) - to extract name, DOB",
+      "Resume/CV - to extract college, skills, projects, internships, GitHub",
+      "Academic Transcripts/Grade Reports - to extract GPA/CGPA, course, year",
+      "College Admission Letter - to extract college name, course",
+      "Parent/Guardian Income Proof (if co-applicant) - to extract income details",
     ],
     requiredFields: [
       "full_name",

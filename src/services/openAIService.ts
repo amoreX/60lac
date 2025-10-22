@@ -34,7 +34,7 @@ export const generateResponse = async (
         handleLoanSubmission(loanData, phoneNumber);
 
         // Return a confirmation message
-        return "✅ Thank you! Your loan application has been successfully submitted. Our team will review your application and get back to you within 24-48 hours. You will receive updates on your registered phone number and email. Is there anything else I can help you with?";
+        return "✅ Thank you! Your loan application has been successfully submitted. Our team will review your application and get back to you within 24-48 hours. You will receive updates on your registered phone number and email.";
       }
     }
 
